@@ -1,0 +1,76 @@
+[build-system]
+requires = ["hatchling==1.31.0"]
+build-backend = "hatchling.build"
+
+[project]
+name = "sourcequorum"
+version = "0.1.0"
+description = "Local, fail-closed source quorum verification"
+requires-python = ">=3.11,<3.15"
+dependencies = [
+    "jsonschema>=4.26,<5",
+    "rfc8785>=0.1.4,<0.2",
+]
+license = "Apache-2.0"
+license-files = ["LICENSE", "NOTICE"]
+authors = [{ name = "liver-detox" }]
+classifiers = [
+    "Development Status :: 2 - Pre-Alpha",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+]
+
+[project.scripts]
+sourcequorum = "sourcequorum.cli:main"
+
+[project.optional-dependencies]
+dev = [
+    "build==1.5.0",
+    "mypy==2.3.0",
+    "pytest==9.1.1",
+    "ruff==0.15.22",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/sourcequorum"]
+
+[tool.hatch.build.targets.sdist]
+ignore-vcs = true
+include = [
+    "/src/sourcequorum",
+    "/tests",
+    "/examples",
+    "/docs/architecture.md",
+    "/docs/manifest-v1.md",
+    "/docs/threat-model.md",
+    "/README.md",
+    "/README.zh-CN.md",
+    "/SECURITY.md",
+    "/CONTRIBUTING.md",
+    "/CHANGELOG.md",
+    "/dependency-register.json",
+    "/LICENSE",
+    "/NOTICE",
+    "/PRIVACY.md",
+    "/public-allowlist.txt",
+    "/pyproject.toml",
+    "/sbom.cdx.json",
+    "/scripts",
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+warn_unreachable = true

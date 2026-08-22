@@ -1,0 +1,92 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "release_id", "dataset_id", "status", "evaluated_at", "canonicalization", "selection", "policy", "sources", "gate", "members", "overwrite_policy"],
+  "properties": {
+    "schema_version": {"const": "sourcequorum.release-manifest.v1"},
+    "release_id": {"type": "string", "pattern": "^sq-v1-[0-9a-f]{64}$"},
+    "dataset_id": {"type": "string", "pattern": "^[a-z][a-z0-9._-]{0,127}$"},
+    "status": {"const": "ACCEPTED"},
+    "evaluated_at": {"type": "string", "format": "date-time"},
+    "canonicalization": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["scheme", "record_framing"],
+      "properties": {"scheme": {"const": "RFC8785"}, "record_framing": {"const": "JCS_BYTES_PLUS_LF"}}
+    },
+    "selection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mode", "candidate_source_id"],
+      "properties": {"mode": {"const": "EXPLICIT_CANDIDATE_NO_MERGE"}, "candidate_source_id": {"type": "string", "pattern": "^[a-z][a-z0-9._-]{0,127}$"}}
+    },
+    "policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256", "byte_count"],
+      "properties": {"path": {"const": "policy.json"}, "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}, "byte_count": {"type": "integer", "minimum": 0}}
+    },
+    "sources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["source_id", "origin_group", "role", "collected_at", "source_manifest_sha256", "records_member"],
+        "properties": {
+          "source_id": {"type": "string", "pattern": "^[a-z][a-z0-9._-]{0,127}$"},
+          "origin_group": {"type": "string", "pattern": "^[a-z][a-z0-9._-]{0,127}$"},
+          "role": {"enum": ["candidate", "crosscheck"]},
+          "collected_at": {"type": "string", "format": "date-time"},
+          "source_manifest_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+          "records_member": {"$ref": "#/$defs/source_records_member"}
+        }
+      }
+    },
+    "gate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "report_path", "report_sha256", "byte_count", "source_count", "record_count", "finding_count"],
+      "properties": {
+        "status": {"const": "ACCEPTED"},
+        "report_path": {"const": "reports/gate-report.json"},
+        "report_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "byte_count": {"type": "integer", "minimum": 0},
+        "source_count": {"type": "integer", "minimum": 0},
+        "record_count": {"type": "integer", "minimum": 0},
+        "finding_count": {"const": 0}
+      }
+    },
+    "members": {"type": "array", "items": {"$ref": "#/$defs/member_digest"}},
+    "overwrite_policy": {"const": "FORBIDDEN"}
+  },
+  "$defs": {
+    "canonical_member_path": {
+      "type": "string",
+      "pattern": "^(?!/)(?!.*//)(?!.*(?:^|/)(?:\\.|\\.\\.)(?:/|$))(?!.*\\/$)[A-Za-z0-9][A-Za-z0-9._/-]*$"
+    },
+    "source_records_member": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256", "byte_count"],
+      "properties": {
+        "path": {"$ref": "#/$defs/canonical_member_path"},
+        "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "byte_count": {"type": "integer", "minimum": 0},
+        "record_count": {"type": "integer", "minimum": 0}
+      }
+    },
+    "member_digest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "media_type", "byte_count", "sha256"],
+      "properties": {
+        "path": {"$ref": "#/$defs/canonical_member_path"},
+        "media_type": {"enum": ["application/json", "application/jsonl"]},
+        "byte_count": {"type": "integer", "minimum": 0},
+        "record_count": {"type": "integer", "minimum": 0},
+        "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+      }
+    }
+  }
+}

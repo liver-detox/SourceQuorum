@@ -1,0 +1,72 @@
+{
+  "completeness_scope": "python-package-runtime-distribution-closure-only",
+  "dependencies": [
+    {
+      "artifact_license_review": "approved",
+      "notice": "not-required",
+      "package": "attrs",
+      "source_url": "https://pypi.org/project/attrs/26.1.0/",
+      "spdx": "MIT",
+      "status": "approved",
+      "version": "26.1.0"
+    },
+    {
+      "artifact_license_review": "approved",
+      "notice": "not-required",
+      "package": "jsonschema-specifications",
+      "source_url": "https://pypi.org/project/jsonschema-specifications/2025.9.1/",
+      "spdx": "MIT",
+      "status": "approved",
+      "version": "2025.9.1"
+    },
+    {
+      "artifact_license_review": "approved",
+      "notice": "not-required",
+      "package": "jsonschema",
+      "source_url": "https://pypi.org/project/jsonschema/4.26.0/",
+      "spdx": "MIT",
+      "status": "approved",
+      "version": "4.26.0"
+    },
+    {
+      "artifact_license_review": "approved",
+      "notice": "not-required",
+      "package": "referencing",
+      "source_url": "https://pypi.org/project/referencing/0.37.0/",
+      "spdx": "MIT",
+      "status": "approved",
+      "version": "0.37.0"
+    },
+    {
+      "artifact_license_review": "approved",
+      "notice": "not-required",
+      "package": "rfc8785",
+      "source_url": "https://pypi.org/project/rfc8785/0.1.4/",
+      "spdx": "Apache-2.0",
+      "status": "approved",
+      "version": "0.1.4"
+    },
+    {
+      "artifact_license_review": "approved",
+      "notice": "not-required",
+      "package": "rpds-py",
+      "source_url": "https://pypi.org/project/rpds-py/2026.6.3/",
+      "spdx": "MIT",
+      "status": "approved",
+      "version": "2026.6.3"
+    },
+    {
+      "artifact_license_review": "approved",
+      "notice": "not-required",
+      "package": "typing_extensions",
+      "source_url": "https://pypi.org/project/typing_extensions/4.16.0/",
+      "spdx": "PSF-2.0",
+      "status": "approved",
+      "version": "4.16.0"
+    }
+  ],
+  "profile": "cpython-3.12-reference-runtime",
+  "rights_status": "approved",
+  "sbom_complete": true,
+  "status": "approved"
+}

@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "status", "dataset_id", "evaluated_at", "source_count", "record_count", "findings"],
+  "properties": {
+    "schema_version": {"const": "sourcequorum.gate-report.v1"},
+    "status": {"enum": ["ACCEPTED", "REJECTED"]},
+    "dataset_id": {"type": "string", "pattern": "^[a-z][a-z0-9._-]{0,127}$"},
+    "evaluated_at": {"type": "string", "format": "date-time"},
+    "source_count": {"type": "integer", "minimum": 0},
+    "record_count": {"type": "integer", "minimum": 0},
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["code"],
+        "properties": {
+          "code": {"enum": ["SQ100", "SQ101", "SQ102", "SQ103", "SQ104", "SQ105", "SQ106", "SQ200", "SQ201", "SQ202", "SQ203", "SQ204", "SQ205", "SQ206", "SQ207", "SQ208", "SQ209", "SQ210", "SQ300", "SQ301", "SQ302", "SQ303", "SQ304", "SQ400"]},
+          "source_id": {"type": "string", "pattern": "^[a-z][a-z0-9._-]{0,127}$"},
+          "field": {"type": "string", "pattern": "^[a-z][a-z0-9_]{0,63}$"},
+          "key_digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+          "count": {"type": "integer", "minimum": 0}
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"status": {"const": "ACCEPTED"}}, "required": ["status"]},
+      "then": {"properties": {"findings": {"maxItems": 0}}}
+    },
+    {
+      "if": {"properties": {"status": {"const": "REJECTED"}}, "required": ["status"]},
+      "then": {"properties": {"findings": {"minItems": 1}}}
+    }
+  ]
+}

@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "dataset_id", "key_fields", "fields", "limits"],
+  "properties": {
+    "schema_version": {"const": "sourcequorum.policy.v1"},
+    "dataset_id": {"type": "string", "pattern": "^[a-z][a-z0-9._-]{0,127}$"},
+    "key_fields": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {"type": "string", "pattern": "^[a-z][a-z0-9_]{0,63}$"}
+    },
+    "fields": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "value_type", "comparison", "nullable", "tolerances"],
+        "properties": {
+          "name": {"type": "string", "pattern": "^[a-z][a-z0-9_]{0,63}$"},
+          "value_type": {"enum": ["string", "integer", "number", "decimal-string", "boolean", "datetime"]},
+          "comparison": {"enum": ["exact", "numeric"]},
+          "nullable": {"type": "boolean"},
+          "tolerances": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["absolute", "relative"],
+            "properties": {
+              "absolute": {"type": "string", "pattern": "^(?:0|[0-9]+(?:\\.[0-9]+)?)$"},
+              "relative": {"type": "string", "pattern": "^(?:0|[0-9]+(?:\\.[0-9]+)?)$"}
+            }
+          }
+        },
+        "allOf": [
+          {
+            "if": {"properties": {"comparison": {"const": "exact"}}, "required": ["comparison"]},
+            "then": {"properties": {"tolerances": {"properties": {"absolute": {"const": "0"}, "relative": {"const": "0"}}}}}
+          },
+          {
+            "if": {"properties": {"comparison": {"const": "numeric"}}, "required": ["comparison"]},
+            "then": {"properties": {"value_type": {"enum": ["integer", "number", "decimal-string"]}}}
+          }
+        ]
+      }
+    },
+    "limits": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["min_sources", "max_sources", "max_age_seconds", "max_future_skew_seconds", "max_records_per_source", "max_line_bytes", "max_member_bytes", "require_distinct_origin_groups"],
+      "properties": {
+        "min_sources": {"type": "integer", "minimum": 2, "maximum": 8},
+        "max_sources": {"type": "integer", "minimum": 2, "maximum": 8},
+        "max_age_seconds": {"type": "integer", "minimum": 1},
+        "max_future_skew_seconds": {"type": "integer", "minimum": 0},
+        "max_records_per_source": {"type": "integer", "minimum": 1},
+        "max_line_bytes": {"type": "integer", "minimum": 1},
+        "max_member_bytes": {"type": "integer", "minimum": 1},
+        "require_distinct_origin_groups": {"const": true}
+      }
+    }
+  },
+  "allOf": [
+    {"if": {"properties": {"limits": {"properties": {"min_sources": {"const": 3}}, "required": ["min_sources"]}}, "required": ["limits"]}, "then": {"properties": {"limits": {"properties": {"max_sources": {"minimum": 3}}}}}},
+    {"if": {"properties": {"limits": {"properties": {"min_sources": {"const": 4}}, "required": ["min_sources"]}}, "required": ["limits"]}, "then": {"properties": {"limits": {"properties": {"max_sources": {"minimum": 4}}}}}},
+    {"if": {"properties": {"limits": {"properties": {"min_sources": {"const": 5}}, "required": ["min_sources"]}}, "required": ["limits"]}, "then": {"properties": {"limits": {"properties": {"max_sources": {"minimum": 5}}}}}},
+    {"if": {"properties": {"limits": {"properties": {"min_sources": {"const": 6}}, "required": ["min_sources"]}}, "required": ["limits"]}, "then": {"properties": {"limits": {"properties": {"max_sources": {"minimum": 6}}}}}},
+    {"if": {"properties": {"limits": {"properties": {"min_sources": {"const": 7}}, "required": ["min_sources"]}}, "required": ["limits"]}, "then": {"properties": {"limits": {"properties": {"max_sources": {"minimum": 7}}}}}},
+    {"if": {"properties": {"limits": {"properties": {"min_sources": {"const": 8}}, "required": ["min_sources"]}}, "required": ["limits"]}, "then": {"properties": {"limits": {"properties": {"max_sources": {"minimum": 8}}}}}}
+  ]
+}
