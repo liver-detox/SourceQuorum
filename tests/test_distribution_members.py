@@ -123,8 +123,10 @@ def test_built_wheel_and_sdist_contain_only_approved_members(tmp_path: Path) -> 
     assert wheel_metadata.get_all("License-File") == ["LICENSE", "NOTICE"]
     assert wheel_metadata.get_all("Requires-Dist") == [
         "jsonschema<5,>=4.26",
+        "rfc3339-validator<0.2,>=0.1.4",
         "rfc8785<0.2,>=0.1.4",
         "build==1.5.0; extra == 'dev'",
+        "hatchling==1.31.0; extra == 'dev'",
         "mypy==2.3.0; extra == 'dev'",
         "pytest==9.1.1; extra == 'dev'",
         "ruff==0.15.22; extra == 'dev'",
@@ -152,8 +154,10 @@ def test_built_wheel_and_sdist_contain_only_approved_members(tmp_path: Path) -> 
     assert pkg_info.get_all("License-File") == ["LICENSE", "NOTICE"]
     assert pkg_info.get_all("Requires-Dist") == [
         "jsonschema<5,>=4.26",
+        "rfc3339-validator<0.2,>=0.1.4",
         "rfc8785<0.2,>=0.1.4",
         "build==1.5.0; extra == 'dev'",
+        "hatchling==1.31.0; extra == 'dev'",
         "mypy==2.3.0; extra == 'dev'",
         "pytest==9.1.1; extra == 'dev'",
         "ruff==0.15.22; extra == 'dev'",

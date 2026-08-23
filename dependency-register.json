@@ -40,6 +40,15 @@
     {
       "artifact_license_review": "approved",
       "notice": "not-required",
+      "package": "rfc3339-validator",
+      "source_url": "https://pypi.org/project/rfc3339-validator/0.1.4/",
+      "spdx": "MIT",
+      "status": "approved",
+      "version": "0.1.4"
+    },
+    {
+      "artifact_license_review": "approved",
+      "notice": "not-required",
       "package": "rfc8785",
       "source_url": "https://pypi.org/project/rfc8785/0.1.4/",
       "spdx": "Apache-2.0",
@@ -54,6 +63,15 @@
       "spdx": "MIT",
       "status": "approved",
       "version": "2026.6.3"
+    },
+    {
+      "artifact_license_review": "approved",
+      "notice": "not-required",
+      "package": "six",
+      "source_url": "https://pypi.org/project/six/1.17.0/",
+      "spdx": "MIT",
+      "status": "approved",
+      "version": "1.17.0"
     },
     {
       "artifact_license_review": "approved",
