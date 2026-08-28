@@ -1,20 +1,21 @@
 # SourceQuorum
 
-SourceQuorum 是一个本地、deterministic fail-closed comparison 工具：它从显式提供的本地来源生成并检查小型研究发布物。
+[English](README.md)
 
-## 证据边界
+SourceQuorum 帮助研究人员在发布小型研究成果前，检查两个明确提供的本地来源是否一致。
 
-本 Phase A 仓库只包含标记为 synthetic 的 `synthetic.inventory.v1` 示例。经过测试的边界会在显式 candidate 与独立 crosscheck 的已声明本地记录一致时接受结果；它不获取数据、不证明现实中的来源独立性、不保证数据真实性，也不验证投资结论。
+首次运行时，可以直接使用仓库附带的合成示例完成一次比较、发布和验证。
 
-接受后可发布内容寻址且 SourceQuorum 不覆盖既有目标的本地制品。它可检测事后变化，不是文件系统写保护：拥有写权限的人仍可改动文件，但验证可发现不一致的已存储发布物。
+## 快速开始
 
-默认验证只检查已存储发布物，不会重算未随发布物保存的原始来源字节。来源重放需要提供全部原始来源目录；它使用 manifest 固化的 `evaluated_at` 重新构建发布物，并要求 release ID 与四个发布成员逐字节一致。两种模式均只读、离线。
+输出根目录需要预先存在。以下命令会在 `./releases/<release-id>` 下创建发布物；
+`publish` 会打印该 ID。
 
-## 五分钟 Quickstart
+```bash
+python -m venv .venv
+source .venv/bin/activate
+python -m pip install .
 
-`--output` 指向的根目录必须预先存在。以下命令以仓库根目录（`.`）为输出根，因此发布物位于 `./releases/<release-id>`；`<release-id>` 来自 publish 输出。
-
-```text
 sourcequorum check --policy examples/inventory/policy.json \
   --source examples/inventory/candidate \
   --source examples/inventory/crosscheck \
@@ -33,16 +34,36 @@ sourcequorum verify ./releases/<release-id> \
   --source examples/inventory/crosscheck --json
 ```
 
-三个用户工作流动作分别是 Evaluate（`check`）、Publish（`publish --commit --output`）和 Verify（`verify`）。`schema` 仅是格式参考命令，不是第四个动作。已提交记录一致；仅在测试副本中把 crosscheck 的 `widget_beta` quantity 从 `11` 改为 `12`，会以 `SQ209` 拒绝。
+1. **检查：**输出接受或拒绝结果，不写入发布物。
+2. **发布：**仅在使用 `--commit` 且输出根目录已存在时写入。
+3. **验证：**检查已存储的发布物；提供全部原始来源目录时，还会重放比较。
+
+仓库附带的记录彼此一致。在测试副本中，只把 crosscheck 的 `widget_beta` 数量
+从 `11` 改为 `12`，就会以 `SQ209` 被拒绝。
+
+## 如何理解结果
+
+SourceQuorum 在本地以确定性方式运行。如果提供的记录不符合所选策略，它会拒绝比较。
+
+- **接受**表示声明的本地记录符合所选策略；这并不证明数据一定真实，也不证明
+  两个来源在现实中彼此独立。
+- 接受后可以创建内容寻址的发布物，SourceQuorum 不会覆盖它。验证可以发现
+  已存储发布物不一致，但不能阻止拥有文件权限的人修改文件。
+- 默认验证检查已存储的发布物。提供全部原始来源目录时，会使用已存储的
+  `evaluated_at` 重放比较，并要求逐字节一致。两种模式都只读且离线。
 
 ## CLI 与 Python API
 
-safe CLI 提供 local 工作流：`check` 只评估，`publish` 仅在带 `--commit` 且输出根已存在时写入，`verify` 默认检查发布物、只有提供全部原始 `--source` 时才重放。`schema` 用于查看支持的 JSON Schema。
+`schema` 用于输出支持的 JSON Schema；它是参考命令，不是第四个工作流操作。
 
-稳定工作流入口为 `load_policy`、`load_source`、`evaluate`、`prepare_release`、`commit_release`、`verify_release`。
+导出的工作流入口为 `load_policy`、`load_source`、`evaluate`、`prepare_release`、
+`commit_release` 和 `verify_release`。
 
-## 限制与许可
+## 适用范围
 
-不包含 data acquisition、network 或 provider integration；不包含 portfolio、account 或 trading analysis；不包含 prediction 或 returns。不作 production-readiness claim，不作 adoption claim，不作 performance claim；不作 OpenAI endorsement；不作 OpenAI eligibility claim。所有示例均为 synthetic，且 not investment or financial advice。原始母项目及其 provenance 和 Git history 不属于本仓库。AI assistance 可能参与了本仓库的准备工作；任何变更在被依赖前均需要 human review。
+SourceQuorum 处理本地文件。它不会获取数据或连接在线数据提供商、券商和账户，
+也不提供交易分析、预测或收益估算。仓库中的示例均为合成数据。
 
-SourceQuorum 采用 Apache-2.0 许可，详见本地 [LICENSE](LICENSE)。仓库可见性不建立 OpenAI 资格、背书、接受或支持。
+## 许可证
+
+SourceQuorum 采用 Apache-2.0 许可证；详见 [LICENSE](LICENSE)。
