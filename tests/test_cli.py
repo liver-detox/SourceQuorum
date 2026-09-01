@@ -152,17 +152,79 @@ def test_check_rejection_and_human_output_are_safe(
     assert "999" not in captured.out
 
 
-@pytest.mark.parametrize("argv", [["check"], ["publish", "--policy", "x", "--source", "y"]])
-def test_check_and_publish_require_explicit_timestamp(
-    argv: list[str], capsys: pytest.CaptureFixture[str]
+@pytest.mark.parametrize(
+    ("argv", "required_fragments", "forbidden_fragments"),
+    [
+        (["--help"], ("check", "publish", "verify", "schema"), ()),
+        (
+            ["check", "--help"],
+            ("compare sources without writing a release", "--policy", "--source", "--at", "--json"),
+            ("--output", "--commit", "release_dir"),
+        ),
+        (
+            ["publish", "--help"],
+            ("prepare a release", "--policy", "--source", "--at", "--output", "--commit", "--json"),
+            ("release_dir",),
+        ),
+        (
+            ["verify", "--help"],
+            ("verify a stored release", "release_dir", "--source", "--json"),
+            ("--policy", "--at", "--output", "--commit"),
+        ),
+        (
+            ["schema", "--help"],
+            ("print a bundled JSON Schema", "{policy,source,gate-report,manifest}"),
+            ("--policy", "--source", "--at", "--output", "--commit"),
+        ),
+    ],
+)
+def test_help_is_recoverable_and_scoped(
+    argv: list[str],
+    required_fragments: tuple[str, ...],
+    forbidden_fragments: tuple[str, ...],
+    capsys: pytest.CaptureFixture[str],
 ) -> None:
-    """Adding an implicit clock or accepting a missing timestamp must fail."""
+    """Removing a command's help or leaking another command's flags must fail."""
     from sourcequorum.cli import main
 
-    assert main(argv) == 2
+    assert main(argv) == 0
+    captured = capsys.readouterr()
+    assert captured.err == ""
+    assert captured.out.startswith("usage: ")
+    for fragment in required_fragments:
+        assert fragment in captured.out
+    for fragment in forbidden_fragments:
+        assert fragment not in captured.out
+
+
+def test_check_missing_options_name_only_safe_required_flags(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """Replacing missing flag names with opaque parse failure must fail."""
+    from sourcequorum.cli import main
+
+    assert main(["check"]) == 2
     captured = capsys.readouterr()
     assert captured.out == ""
-    assert captured.err == "error: invalid arguments\n"
+    assert captured.err.startswith("usage: sourcequorum check ")
+    assert captured.err.endswith("error: missing required arguments: --policy, --source, --at\n")
+
+
+def test_timestamp_without_timezone_is_safe_and_actionable(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """Accepting timezone-free times or rendering their value must fail."""
+    from sourcequorum.cli import main
+
+    timestamp = "2042-06-07T08:09:10"
+    assert main(["check", "--policy", "x", "--source", "y", "--at", timestamp]) == 2
+    captured = capsys.readouterr()
+    assert captured.out == ""
+    assert captured.err.startswith("usage: sourcequorum check ")
+    assert captured.err.endswith(
+        "error: --at requires an ISO 8601 timestamp with a timezone\n"
+    )
+    assert timestamp not in captured.err
 
 
 def test_publish_without_commit_prepares_without_touching_output(
@@ -240,7 +302,10 @@ def test_publish_commit_requires_output_and_maps_commit_refusal(
         ]
     )
     second = capsys.readouterr()
-    assert no_output == 2 and first.err == "error: invalid arguments\n"
+    assert no_output == 2
+    assert first.out == ""
+    assert first.err.startswith("usage: sourcequorum publish ")
+    assert first.err.endswith("error: --commit requires --output\n")
     assert (
         refusal == 4
         and second.out == ""
@@ -315,7 +380,8 @@ def test_publish_commit_without_output_is_rejected_before_loading_rejected_input
     )
     captured = capsys.readouterr()
     assert captured.out == ""
-    assert captured.err == "error: invalid arguments\n"
+    assert captured.err.startswith("usage: sourcequorum publish ")
+    assert captured.err.endswith("error: --commit requires --output\n")
     assert str(tmp_path) not in captured.err
     assert "999" not in captured.err
 
@@ -351,7 +417,8 @@ def test_argument_failures_do_not_echo_untrusted_tokens(
     assert main(["check", argument]) == 2
     captured = capsys.readouterr()
     assert captured.out == ""
-    assert captured.err == "error: invalid arguments\n"
+    assert captured.err.startswith("usage: sourcequorum check ")
+    assert captured.err.endswith("error: invalid or unrecognized arguments\n")
     assert argument not in captured.err
 
 
