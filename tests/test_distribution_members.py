@@ -11,7 +11,7 @@ from email.parser import BytesParser
 
 
 ROOT = Path(__file__).resolve().parents[1]
-VERSION = "0.1.0"
+VERSION = "0.1.1"
 
 PACKAGE_MEMBERS = {
     "__init__.py",
