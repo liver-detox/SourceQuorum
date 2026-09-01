@@ -276,6 +276,14 @@ def main(argv: Sequence[str] | None = None) -> int:
     """Run one explicit local operation and return a stable process exit status."""
     try:
         namespace = _parser().parse_args(argv)
+    except _ArgumentFailure as error:
+        sys.stderr.write(error.usage)
+        sys.stderr.write(f"error: {error.message}\n")
+        return 2
+    except SystemExit as error:
+        return cast(int, error.code)
+
+    try:
         if namespace.command == "check":
             return _check(namespace)
         if namespace.command == "publish":
@@ -291,8 +299,9 @@ def main(argv: Sequence[str] | None = None) -> int:
         sys.stderr.write(error.usage)
         sys.stderr.write(f"error: {error.message}\n")
         return 2
-    except SystemExit as error:
-        return cast(int, error.code)
+    except SystemExit:
+        sys.stderr.write("error: SQ000 internal refusal\n")
+        return 2
     except SourceQuorumError as error:
         return _error(error)
     except Exception:

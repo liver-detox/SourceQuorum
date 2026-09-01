@@ -80,6 +80,7 @@ def _run(example: Path, capsys: pytest.CaptureFixture[str]) -> tuple[int, str]:
 def test_demo_runs_the_checked_in_inventory_release_workflow() -> None:
     """The first-run demo must run all three real CLI stages and summarize success."""
     environment = {**os.environ, "PYTHONPATH": str(ROOT / "src")}
+    before = {entry.name for entry in ROOT.glob(".sourcequorum-demo-*")}
     completed = subprocess.run(
         [sys.executable, "scripts/demo.py"],
         cwd=ROOT,
@@ -97,6 +98,8 @@ def test_demo_runs_the_checked_in_inventory_release_workflow() -> None:
         "3/3 verify: VALID",
         "Demo complete.",
     ]
+    after = {entry.name for entry in ROOT.glob(".sourcequorum-demo-*")}
+    assert after == before
 
 
 def test_synthetic_inventory_is_accepted_and_one_changed_value_is_sq209(

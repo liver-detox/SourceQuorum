@@ -11,13 +11,22 @@ SourceQuorum 帮助研究人员在发布小型研究成果前，检查两个明�
 运行仓库附带的合成库存示例，依次完成检查、发布和已存储发布物验证。演示会创建并
 自动删除临时输出。
 
+macOS/Linux：
+
 ```bash
 python -m venv .venv
-# macOS/Linux 激活
 source .venv/bin/activate
-# Windows PowerShell：.venv\Scripts\Activate.ps1
 python -m pip install .
 python scripts/demo.py
+```
+
+Windows PowerShell：
+
+```powershell
+py -m venv .venv
+.venv\Scripts\Activate.ps1
+py -m pip install .
+py scripts/demo.py
 ```
 
 预期输出：

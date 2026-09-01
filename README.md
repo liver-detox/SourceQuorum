@@ -13,13 +13,22 @@ publish a content-addressed release, and verify it.
 Run the included synthetic inventory example from check through publish and
 stored-release verification. The demo creates and removes its temporary output.
 
+macOS/Linux:
+
 ```bash
 python -m venv .venv
-# macOS/Linux activation
 source .venv/bin/activate
-# Windows PowerShell: .venv\Scripts\Activate.ps1
 python -m pip install .
 python scripts/demo.py
+```
+
+Windows PowerShell:
+
+```powershell
+py -m venv .venv
+.venv\Scripts\Activate.ps1
+py -m pip install .
+py scripts/demo.py
 ```
 
 Expected output:

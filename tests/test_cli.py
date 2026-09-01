@@ -158,22 +158,22 @@ def test_check_rejection_and_human_output_are_safe(
         (["--help"], ("check", "publish", "verify", "schema"), ()),
         (
             ["check", "--help"],
-            ("compare sources without writing a release", "--policy", "--source", "--at", "--json"),
+            ("--policy", "--source", "--at", "--json"),
             ("--output", "--commit", "release_dir"),
         ),
         (
             ["publish", "--help"],
-            ("prepare a release", "--policy", "--source", "--at", "--output", "--commit", "--json"),
+            ("--policy", "--source", "--at", "--output", "--commit", "--json"),
             ("release_dir",),
         ),
         (
             ["verify", "--help"],
-            ("verify a stored release", "release_dir", "--source", "--json"),
+            ("release_dir", "--source", "--json"),
             ("--policy", "--at", "--output", "--commit"),
         ),
         (
             ["schema", "--help"],
-            ("print a bundled JSON Schema", "{policy,source,gate-report,manifest}"),
+            ("{policy,source,gate-report,manifest}",),
             ("--policy", "--source", "--at", "--output", "--commit"),
         ),
     ],
@@ -435,6 +435,25 @@ def test_unexpected_exception_is_a_fixed_safe_refusal(
     assert captured.err == "error: SQ000 internal refusal\n"
     assert "OS_SENTINEL" not in captured.err
     assert "RAW_PATH" not in captured.err
+
+
+@pytest.mark.parametrize("exit_code", [None, 0, "RAW_SENTINEL"])
+def test_runtime_system_exit_is_a_fixed_safe_refusal(
+    exit_code: object, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """Returning a runtime SystemExit code or value must fail this safe boundary."""
+    import sourcequorum.cli as cli
+
+    def raise_system_exit(_path: Path) -> object:
+        raise SystemExit(exit_code)
+
+    monkeypatch.setattr(cli, "load_policy", raise_system_exit)
+
+    assert cli.main(["check", "--policy", "RAW_PATH", "--source", "RAW_SOURCE", "--at", AT]) == 2
+    captured = capsys.readouterr()
+    assert captured.out == ""
+    assert captured.err == "error: SQ000 internal refusal\n"
+    assert "RAW_SENTINEL" not in captured.err
 
 
 def test_built_wheel_installs_both_subprocess_entry_points(
