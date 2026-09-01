@@ -4,10 +4,10 @@ from __future__ import annotations
 
 import argparse
 import sys
-from collections.abc import Sequence
+from collections.abc import Iterable, Sequence
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import NoReturn, cast
+from typing import NoReturn, TypeVar, cast, overload
 
 from .canonical import dumps_canonical
 from .errors import CommitError, GateRejectedError, IntegrityError, SourceQuorumError
@@ -29,17 +29,45 @@ class _ArgumentFailure(Exception):
         self.message = message
 
 
+_Namespace = TypeVar("_Namespace")
+
+
 class _SafeParser(argparse.ArgumentParser):
+    @overload
     def parse_known_args(
-        self, args: Sequence[str] | None = None, namespace: argparse.Namespace | None = None
-    ) -> tuple[argparse.Namespace, list[str]]:
-        self._input_args = tuple(sys.argv[1:] if args is None else args)
-        return super().parse_known_args(args, namespace)
+        self,
+        args: Iterable[str] | None = ...,
+        namespace: None = ...,
+    ) -> tuple[argparse.Namespace, list[str]]: ...
+
+    @overload
+    def parse_known_args(
+        self,
+        args: Iterable[str] | None,
+        namespace: _Namespace,
+    ) -> tuple[_Namespace, list[str]]: ...
+
+    @overload
+    def parse_known_args(self, *, namespace: _Namespace) -> tuple[_Namespace, list[str]]: ...
+
+    def parse_known_args(
+        self,
+        args: Iterable[str] | None = None,
+        namespace: object | None = None,
+    ) -> tuple[object, list[str]]:
+        if args is None:
+            self._input_args = tuple(sys.argv[1:])
+            return super().parse_known_args(None, namespace)
+        self._input_args = tuple(args)
+        return super().parse_known_args(self._input_args, namespace)
 
     def error(self, message: str) -> NoReturn:
         if message.startswith("argument --at:"):
             safe_message = "--at requires an ISO 8601 timestamp with a timezone"
-        elif message.startswith("the following arguments are required:") and not self._has_unknown_input():
+        elif (
+            message.startswith("the following arguments are required:")
+            and not self._has_unknown_input()
+        ):
             missing = message.partition(": ")[2]
             safe_message = f"missing required arguments: {missing}"
         else:
@@ -49,9 +77,7 @@ class _SafeParser(argparse.ArgumentParser):
     def _has_unknown_input(self) -> bool:
         if any(not action.option_strings for action in self._actions):
             return False
-        actions = {
-            option: action for action in self._actions for option in action.option_strings
-        }
+        actions = {option: action for action in self._actions for option in action.option_strings}
         value_expected = False
         for token in self._input_args:
             if value_expected:
@@ -104,7 +130,9 @@ def _parser() -> _SafeParser:
         description="verify a stored release; repeated --source values replay it",
     )
     verify.add_argument("release_dir")
-    verify.add_argument("--source", action="append", default=[], help="source directory; repeat for each source")
+    verify.add_argument(
+        "--source", action="append", default=[], help="source directory; repeat for each source"
+    )
     verify.add_argument("--json", action="store_true", help="JSON output")
 
     schema = subcommands.add_parser(

@@ -221,9 +221,7 @@ def test_timestamp_without_timezone_is_safe_and_actionable(
     captured = capsys.readouterr()
     assert captured.out == ""
     assert captured.err.startswith("usage: sourcequorum check ")
-    assert captured.err.endswith(
-        "error: --at requires an ISO 8601 timestamp with a timezone\n"
-    )
+    assert captured.err.endswith("error: --at requires an ISO 8601 timestamp with a timezone\n")
     assert timestamp not in captured.err
 
 
