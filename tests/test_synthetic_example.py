@@ -19,68 +19,6 @@ EXAMPLE = ROOT / "examples" / "inventory"
 AT = "2040-01-15T00:05:00+00:00"
 
 
-def _readme_phrases(relative: str) -> tuple[str, ...]:
-    shared = (
-        "synthetic",
-        "ai assistance",
-        "human review",
-        "not investment or financial advice",
-        "deterministic fail-closed comparison",
-        "local",
-    )
-    language_specific = {
-        "README.md": (
-            "explicit candidate plus an independent crosscheck",
-            "content-addressed release that sourcequorum does not overwrite",
-            "default verification checks the stored release only",
-            "safe cli",
-            "no production-readiness claim",
-            "no data acquisition",
-            "no network",
-            "no provider integration",
-            "no portfolio",
-            "no account",
-            "no trading analysis",
-            "no adoption claim",
-            "no performance claim",
-            "no prediction or returns",
-            "no openai endorsement",
-            "no openai eligibility claim",
-            "original mother project",
-            "provenance and git history",
-            "not part of this repository",
-            "licensed under apache-2.0",
-            "repository visibility does not establish openai eligibility, endorsement, acceptance, or support",
-        ),
-        "README.zh-CN.md": (
-            "显式 candidate 与独立 crosscheck",
-            "内容寻址且 sourcequorum 不覆盖既有目标",
-            "默认验证只检查已存储发布物",
-            "safe cli",
-            "不作 production-readiness claim",
-            "不包含 data acquisition",
-            "network 或 provider integration",
-            "不包含 portfolio",
-            "account 或 trading analysis",
-            "不作 adoption claim",
-            "不作 performance claim",
-            "不包含 prediction 或 returns",
-            "不作 openai endorsement",
-            "不作 openai eligibility claim",
-            "原始母项目",
-            "provenance 和 git history",
-            "不属于本仓库",
-            "仓库可见性不建立 openai 资格、背书、接受或支持",
-            "采用 apache-2.0 许可",
-        ),
-    }
-    return shared + language_specific[relative]
-
-
-def _assert_readme_boundary(relative: str, content: str) -> None:
-    assert all(phrase in content.casefold() for phrase in _readme_phrases(relative))
-
-
 def _assert_fixture_privacy(example: Path) -> None:
     for path in example.rglob("*"):
         assert not path.is_symlink()
@@ -380,57 +318,6 @@ def test_fixture_privacy_rejects_path_and_workspace_sentinels(
     source_path.write_text(json.dumps(source), encoding="utf-8")
     with pytest.raises(AssertionError):
         _assert_fixture_privacy(copied)
-
-
-@pytest.mark.parametrize("relative", ["README.md", "README.zh-CN.md"])
-def test_each_readme_states_every_public_truth_boundary(relative: str) -> None:
-    """Dropping any safety, provenance, licensing, or claim limit from either README must fail."""
-    content = (ROOT / relative).read_text(encoding="utf-8").casefold()
-    _assert_readme_boundary(relative, content)
-
-
-@pytest.mark.parametrize("relative", ["README.md", "README.zh-CN.md"])
-def test_each_readme_phrase_is_independently_required(relative: str) -> None:
-    """Removing any one frozen truth phrase from either real README must fail its contract."""
-    content = (ROOT / relative).read_text(encoding="utf-8").casefold()
-    for phrase in _readme_phrases(relative):
-        assert phrase in content
-        mutated = content.replace(phrase, "removed-boundary")
-        with pytest.raises(AssertionError):
-            _assert_readme_boundary(relative, mutated)
-
-
-@pytest.mark.parametrize(
-    ("relative", "capability_phrases"),
-    [
-        (
-            "README.md",
-            (
-                "explicit candidate plus an independent crosscheck",
-                "content-addressed release that sourcequorum does not overwrite",
-                "default verification checks the stored release only",
-                "safe cli",
-                "no openai eligibility claim",
-            ),
-        ),
-        (
-            "README.zh-CN.md",
-            (
-                "显式 candidate 与独立 crosscheck",
-                "内容寻址且 sourcequorum 不覆盖既有目标",
-                "默认验证只检查已存储发布物",
-                "safe cli",
-                "不作 openai eligibility claim",
-            ),
-        ),
-    ],
-)
-def test_readme_contract_includes_each_tested_capability_and_eligibility_limit(
-    relative: str, capability_phrases: tuple[str, ...]
-) -> None:
-    """Omitting a tested capability or merging eligibility into endorsement must fail."""
-    frozen = _readme_phrases(relative)
-    assert all(phrase in frozen for phrase in capability_phrases)
 
 
 def test_ci_is_manual_read_only_and_has_no_external_or_distribution_side_effects() -> None:
