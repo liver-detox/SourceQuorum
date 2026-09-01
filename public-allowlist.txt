@@ -22,6 +22,7 @@ pyproject.toml
 sbom.cdx.json
 scripts/__init__.py
 scripts/audit_release.py
+scripts/demo.py
 src/sourcequorum/__init__.py
 src/sourcequorum/__main__.py
 src/sourcequorum/_schemas/gate-report-v1.schema.json

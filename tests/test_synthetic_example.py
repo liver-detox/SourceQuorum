@@ -4,8 +4,11 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import re
 import shutil
+import subprocess
+import sys
 from pathlib import Path
 
 import pytest
@@ -72,6 +75,28 @@ def _run(example: Path, capsys: pytest.CaptureFixture[str]) -> tuple[int, str]:
     captured = capsys.readouterr()
     assert captured.err == ""
     return result, captured.out
+
+
+def test_demo_runs_the_checked_in_inventory_release_workflow() -> None:
+    """The first-run demo must run all three real CLI stages and summarize success."""
+    environment = {**os.environ, "PYTHONPATH": str(ROOT / "src")}
+    completed = subprocess.run(
+        [sys.executable, "scripts/demo.py"],
+        cwd=ROOT,
+        env=environment,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert completed.returncode == 0
+    assert completed.stderr == ""
+    assert completed.stdout.splitlines() == [
+        "1/3 check: ACCEPTED",
+        "2/3 publish: COMMITTED",
+        "3/3 verify: VALID",
+        "Demo complete.",
+    ]
 
 
 def test_synthetic_inventory_is_accepted_and_one_changed_value_is_sq209(

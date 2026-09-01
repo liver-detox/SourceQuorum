@@ -6,16 +6,35 @@ SourceQuorum 帮助研究人员在发布小型研究成果前，检查两个明�
 
 首次运行时，可以直接使用仓库附带的合成示例完成一次比较、发布和验证。
 
-## 快速开始
+## 首次使用
+
+运行仓库附带的合成库存示例，依次完成检查、发布和已存储发布物验证。演示会创建并
+自动删除临时输出。
+
+```bash
+python -m venv .venv
+# macOS/Linux 激活
+source .venv/bin/activate
+# Windows PowerShell：.venv\Scripts\Activate.ps1
+python -m pip install .
+python scripts/demo.py
+```
+
+预期输出：
+
+```text
+1/3 check: ACCEPTED
+2/3 publish: COMMITTED
+3/3 verify: VALID
+Demo complete.
+```
+
+## 可选：逐步执行
 
 输出根目录需要预先存在。以下命令会在 `./releases/<release-id>` 下创建发布物；
 `publish` 会打印该 ID。
 
 ```bash
-python -m venv .venv
-source .venv/bin/activate
-python -m pip install .
-
 sourcequorum check --policy examples/inventory/policy.json \
   --source examples/inventory/candidate \
   --source examples/inventory/crosscheck \
@@ -38,8 +57,21 @@ sourcequorum verify ./releases/<release-id> \
 2. **发布：**仅在使用 `--commit` 且输出根目录已存在时写入。
 3. **验证：**检查已存储的发布物；提供全部原始来源目录时，还会重放比较。
 
-仓库附带的记录彼此一致。在测试副本中，只把 crosscheck 的 `widget_beta` 数量
-从 `11` 改为 `12`，就会以 `SQ209` 被拒绝。
+## 帮助
+
+```bash
+sourcequorum --help
+sourcequorum check --help
+```
+
+- candidate = 待发布来源；crosscheck = 用于交叉核对它的来源。
+- `--at` 是评估时间，且必须带时区。
+- 每个来源都重复一次 `--source`。
+
+有效的不一致——即每个来源自身仍然有效，但 candidate 与 crosscheck 的值不同——会以
+`SQ209` 和退出状态 1 被拒绝。
+
+如果某一步令人困惑，请创建 GitHub Issue，并说明第一个令人困惑的步骤。
 
 ## 如何理解结果
 
@@ -61,8 +93,7 @@ SourceQuorum 在本地以确定性方式运行。如果提供的记录不符合�
 
 ## 适用范围
 
-SourceQuorum 处理本地文件。它不会获取数据或连接在线数据提供商、券商和账户，
-也不提供交易分析、预测或收益估算。仓库中的示例均为合成数据。
+SourceQuorum 处理本地文件，且不会获取数据。仓库中的示例均为合成数据。
 
 ## 许可证
 

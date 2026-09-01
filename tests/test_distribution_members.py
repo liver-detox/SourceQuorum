@@ -72,6 +72,7 @@ PUBLIC_MEMBERS = {
     "public-allowlist.txt",
     "scripts/__init__.py",
     "scripts/audit_release.py",
+    "scripts/demo.py",
     "sbom.cdx.json",
 }
 
