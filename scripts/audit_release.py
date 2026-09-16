@@ -24,6 +24,7 @@ _TEXT_LIMIT = 2_000_000
 _HTTP_PREFIX = "http" + "://"
 _HTTPS_PREFIX = "https" + "://"
 _SCHEMA_URL = _HTTPS_PREFIX + "json-schema.org/draft/2020-12/schema"
+_README_CLONE_URL = _HTTPS_PREFIX + "github.com/liver-detox/SourceQuorum.git"
 _URL_PATTERN = re.compile(r"(?i)\b(?:https?|ssh)://[^\s\"'<>]+")
 _CONTENT_RULES: tuple[tuple[str, tuple[re.Pattern[str], ...]], ...] = (
     (
@@ -314,6 +315,11 @@ def _has_unapproved_url(text: str, logical_path: str) -> bool:
     try:
         payload = _load_unique_json(text)
     except (json.JSONDecodeError, ValueError):
+        if logical_path in {"README.md", "README.zh-CN.md"}:
+            return any(
+                match.group(0) != _README_CLONE_URL
+                for match in _URL_PATTERN.finditer(text.replace(r"\/", "/"))
+            )
         return _URL_PATTERN.search(text.replace(r"\/", "/")) is not None
 
     def inspect(value: object, value_path: tuple[str | int, ...]) -> bool:

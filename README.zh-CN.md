@@ -8,13 +8,18 @@ SourceQuorum 帮助研究人员在发布小型研究成果前，检查两个明�
 
 ## 首次使用
 
+需要 Git 和 Python 3.11–3.14。先下载并进入仓库；如果已有本地副本，
+可从仓库根目录开始，跳过下载和进入目录两步。
+
 运行仓库附带的合成库存示例，依次完成检查、发布和已存储发布物验证。演示会创建并
 自动删除临时输出。
 
 macOS/Linux：
 
 ```bash
-python -m venv .venv
+git clone https://github.com/liver-detox/SourceQuorum.git
+cd SourceQuorum
+python3 -m venv .venv
 source .venv/bin/activate
 python -m pip install .
 python scripts/demo.py
@@ -23,6 +28,8 @@ python scripts/demo.py
 Windows PowerShell：
 
 ```powershell
+git clone https://github.com/liver-detox/SourceQuorum.git
+cd SourceQuorum
 py -m venv .venv
 .venv\Scripts\Activate.ps1
 py -m pip install .
@@ -71,11 +78,20 @@ sourcequorum verify ./releases/<release-id> \
 ```bash
 sourcequorum --help
 sourcequorum check --help
+sourcequorum schema source
 ```
 
 - candidate = 待发布来源；crosscheck = 用于交叉核对它的来源。
 - `--at` 是评估时间，且必须带时区。
 - 每个来源都重复一次 `--source`。
+- `source.json` 中的 `source_id` 和 `origin_group` 必须以小写字母开头，
+  后续只能使用小写字母、数字、`.`、`_` 或 `-`，总长不超过 128 个字符。
+  例如使用 `synthetic_candidate`，不要使用大写编号。
+- 修改 `records.jsonl` 后，需要同步更新 `source.json` 中的 `sha256`、
+  `byte_count` 和 `record_count`；这些值对应文件的精确字节内容。
+
+如果自建来源返回 `SQ101: invalid source manifest`，可运行
+`sourcequorum schema source` 检查字段要求，尤其是上面的编号格式。
 
 有效的不一致——即每个来源自身仍然有效，但 candidate 与 crosscheck 的值不同——会以
 `SQ209` 和退出状态 1 被拒绝。

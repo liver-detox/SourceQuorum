@@ -10,13 +10,18 @@ publish a content-addressed release, and verify it.
 
 ## First use
 
+Requires Git and Python 3.11–3.14. Download and enter the repository first;
+if you already have a checkout, start there and skip the two Git/directory steps.
+
 Run the included synthetic inventory example from check through publish and
 stored-release verification. The demo creates and removes its temporary output.
 
 macOS/Linux:
 
 ```bash
-python -m venv .venv
+git clone https://github.com/liver-detox/SourceQuorum.git
+cd SourceQuorum
+python3 -m venv .venv
 source .venv/bin/activate
 python -m pip install .
 python scripts/demo.py
@@ -25,6 +30,8 @@ python scripts/demo.py
 Windows PowerShell:
 
 ```powershell
+git clone https://github.com/liver-detox/SourceQuorum.git
+cd SourceQuorum
 py -m venv .venv
 .venv\Scripts\Activate.ps1
 py -m pip install .
@@ -74,12 +81,21 @@ sourcequorum verify ./releases/<release-id> \
 ```bash
 sourcequorum --help
 sourcequorum check --help
+sourcequorum schema source
 ```
 
 - A candidate is the source intended for release; a crosscheck is the source
   used to cross-check it.
 - `--at` is the evaluation time and must include a timezone.
 - Repeat `--source` once for each source.
+- In `source.json`, `source_id` and `origin_group` must start with a lowercase
+  letter and contain only lowercase letters, digits, `.`, `_`, or `-` (up to
+  128 characters). For example, use `synthetic_candidate`, not an uppercase ID.
+- After editing `records.jsonl`, update its `sha256`, `byte_count`, and
+  `record_count` in `source.json`. These describe the exact file bytes.
+
+If a custom source returns `SQ101: invalid source manifest`, inspect its
+fields with `sourcequorum schema source`, including the identifier rules above.
 
 A valid disagreement—where each source remains internally valid but the
 candidate and crosscheck values differ—is rejected with `SQ209` and exit

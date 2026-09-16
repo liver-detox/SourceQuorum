@@ -452,6 +452,64 @@ def test_hidden_policy_has_only_two_exact_public_exceptions(
     assert ("RG-SOURCE-HIDDEN" in result.rule_ids) is blocked
 
 
+@pytest.mark.parametrize("logical_path", ["README.md", "README.zh-CN.md"])
+def test_readme_clone_url_exception_allows_only_the_documented_command(logical_path: str) -> None:
+    clone_url = "https" + "://github.com/liver-detox/SourceQuorum.git"
+
+    assert _content_rule_ids(f"git clone {clone_url}\n".encode(), logical_path) == ()
+    credential = "api_" + "key=SQ_SYNTHETIC_SECRET_123456789"
+    assert "RG-CONTENT-SECRET" in _content_rule_ids(
+        f"git clone {clone_url}\n{credential}\n".encode(), logical_path
+    )
+
+
+@pytest.mark.parametrize(
+    ("logical_path", "suffix", "extra"),
+    [
+        ("README.md", "/extra", ""),
+        ("README.md", "?ref=synthetic", ""),
+        ("README.md", "#synthetic", ""),
+        ("README.md", ".invalid", ""),
+        ("README.md", "", "\nhttps" + "://example.invalid/extra"),
+        ("README.zh-CN.md", "", "\nhttps" + "://example.invalid/extra"),
+        ("docs/README.md", "", ""),
+        ("src/example.py", "", ""),
+    ],
+)
+def test_readme_clone_url_exception_does_not_broaden_url_policy(
+    logical_path: str, suffix: str, extra: str
+) -> None:
+    clone_url = "https" + "://github.com/liver-detox/SourceQuorum.git"
+
+    assert "RG-CONTENT-URL" in _content_rule_ids(
+        f"git clone {clone_url}{suffix}{extra}\n".encode(), logical_path
+    )
+
+
+@pytest.mark.parametrize("carrier", ["source", "git", "sdist"])
+def test_readme_clone_url_keeps_its_logical_path_across_release_carriers(
+    tmp_path: Path, carrier: str
+) -> None:
+    root, allowlist, register, sbom = _approved_tree(tmp_path, "sourcequorum")
+    clone_url = "https" + "://github.com/liver-detox/SourceQuorum.git"
+    content = f"git clone {clone_url}\n"
+    _write(root / "README.md", content)
+    _append_allowlist(allowlist, "README.md")
+    artifacts: tuple[Path, ...] = ()
+    if carrier == "git":
+        _commit_all(root)
+        (root / "README.md").unlink()
+    elif carrier == "sdist":
+        artifacts = (_sdist_with_member(tmp_path, "sourcequorum", "README.md", content, "readme"),)
+
+    result = audit_release(
+        root, allowlist=allowlist, dependency_register=register, sbom=sbom, artifacts=artifacts
+    )
+
+    assert "RG-CONTENT-URL" not in result.rule_ids
+    assert "RG-GIT-CONTENT" not in result.rule_ids
+
+
 def test_schema_url_exception_is_exact_and_path_bound(tmp_path: Path) -> None:
     """A global URL exemption or a non-schema exception must permit an unapproved endpoint."""
     root, allowlist, register, sbom = _approved_tree(tmp_path)
